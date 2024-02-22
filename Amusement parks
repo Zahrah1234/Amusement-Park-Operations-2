@@ -1,0 +1,182 @@
+#github
+from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+import random
+
+class AmusementPark:
+    def __init__(self, name, attraction, capacity, visitor_entry):
+        self.name = name
+        self.attraction = attraction
+        self.capacity = capacity
+        self.visitor_entry = visitor_entry #represents the current number of visitors in the amusement park ride
+        self.visitor_count_history = {attraction: {}} #keeps track of the number of visitors over time for each attraction.
+
+    def enter(self):
+        if self.visitor_entry < self.capacity:
+            self.visitor_entry += 1
+            self.record_visitor()
+        else:
+            print(f"Sorry, {self.name} is at maximum capacity and cannot accept more visitors.")
+
+    def exit(self):
+        if self.visitor_entry > 0:
+            self.visitor_entry -= 1
+            self.record_visitor()
+        else:
+            print(f"No visitors to exit at {self.name}.")
+
+    def record_visitor(self):
+        now = datetime.now()
+        future_date = now + timedelta(days=random.randint(1, 365))
+        month = future_date.strftime("%B")
+        if month in self.visitor_count_history[self.attraction]:
+            self.visitor_count_history[self.attraction][month] += 1
+        else:
+            self.visitor_count_history[self.attraction][month] = 1
+
+    def plot_visitor_count_over_time(self):
+        months_to_plot = input("Enter the month names separated by commas (e.g., January, February, March) to view the number of visitors: ").split(",")
+        months_to_plot = [month.strip() for month in months_to_plot]
+        filtered_history = {month: count for month, count in self.visitor_count_history[self.attraction].items() if month in months_to_plot}
+        visitor_counts = list(filtered_history.values())
+        months = list(filtered_history.keys())
+        plt.plot(months, visitor_counts)
+        plt.title(f'Visitor Count by Month at {self.attraction}')
+        plt.xlabel('Month')
+        plt.ylabel('Visitor Count')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
+
+# Create an instance of the AmusementPark class
+park = AmusementPark("Wonderland", "Roller Coaster", 1000, 50)
+
+# Simulate visitors entering the park multiple times
+num_visitors_per_month = {'January': 150, 'February': 200, 'March': 250, 'April': 300}
+for month, num_visitors in num_visitors_per_month.items():
+    for _ in range(num_visitors):
+        park.enter()
+        park.exit()
+
+# Plot the visitor count for the user-specified months
+park.plot_visitor_count_over_time()
+
+
+import sqlite3
+
+# Connect to the database (creates a new database if it doesn't exist)
+conn = sqlite3.connect('test4.db')
+
+# Create a cursor object to execute SQL queries
+cur = conn.cursor()
+
+# Create a table for employees
+cur.execute('''CREATE TABLE IF NOT EXISTS employees
+               (id INTEGER PRIMARY KEY, role TEXT, shift TEXT, salary REAL, contact TEXT)''')
+
+# Add a new employee
+cur.execute("INSERT INTO employees (role, shift, salary, contact) VALUES (?, ?, ?, ?)", ("manager", "morning", 55000, "416-707-7020"))
+
+
+cur.execute("INSERT INTO employees (role, shift, salary, contact) VALUES (?, ?, ?, ?)",
+             ("supervisor", "afternoon", 30000, "437-707-5090"))
+
+
+cur.execute("INSERT INTO employees (role, shift, salary, contact) VALUES (?, ?, ?, ?)",
+             ("associate", "morning", 25000, "543-909-4567"))
+
+
+cur.execute("INSERT INTO employees (role, shift, salary, contact) VALUES (?, ?, ?, ?)",
+             ("receptionist", "evening", 45000, "415-707-8670"))
+
+
+cur.execute("INSERT INTO employees (role, shift, salary, contact) VALUES (?, ?, ?, ?)",
+             ("senior manager", "evening", 75000, "432-909-7865"))
+
+
+conn.commit()
+
+# Prompt user for shift
+shift = input("Enter the shift (morning, afternoon, evening) to see who is working it: ")
+
+# Execute a SQL query to select rows from the employees table based on shift
+cur.execute("SELECT * FROM employees WHERE shift = ?", (shift,))
+
+
+rows = cur.fetchall()
+
+print("Role\t\tShift\tSalary\t\tContact")
+print("="*60)
+
+
+for row in rows:
+    print(f"{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}")
+
+
+conn.close()
+
+import random
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+
+class Revenue:
+    def __init__(self, source, payment_method):
+        self.source = source.title()  # Convert to title case
+        self.payment_method = payment_method.title()  # Convert to title case
+        self.revenue = self.calculate_revenue()
+
+    def calculate_revenue(self):
+        return random.randint(100, 1000)
+
+    def display_revenue(self):
+        print(f"Revenue from {self.source} ({self.payment_method}): ${self.revenue}")
+
+# Create a dictionary to store revenue data
+revenue_data = {
+    "Ticket Sales": "Cash",
+    "Merchandise": "Credit Card",
+    "Food and Drink": "Credit Card",
+    "Online Sales": "Credit Card",
+    "Entrance ticket sales": "Cash",
+    "Ticket Sales": "Credit Card"
+}
+
+# Create an empty list to store the revenue instances
+revenues = []
+
+# Loop through the revenue data and create instances of the Revenue class
+for source, payment_method in revenue_data.items():
+    revenue_instance = Revenue(source, payment_method)
+    revenues.append(revenue_instance)
+
+
+# Create a DataFrame from the revenue data
+revenue_source_df = pd.DataFrame([[revenue.source, revenue.revenue] for revenue in revenues], columns=["Source", "Revenue"])
+# Calculate total revenue by source
+total_revenue_by_source = revenue_source_df.groupby("Source")["Revenue"].sum()
+print("Total Revenue by Source:")
+print(total_revenue_by_source)
+
+# Create a DataFrame from the revenue data
+revenue_payment_df = pd.DataFrame([[revenue.payment_method, revenue.revenue] for revenue in revenues], columns=["Payment Method", "Revenue"])
+# Calculate total revenue by payment method
+total_revenue_by_payment_method = revenue_payment_df.groupby("Payment Method")["Revenue"].sum()
+print("Total Revenue by Payment Method:")
+print(total_revenue_by_payment_method)
+
+# Create a bar plot of revenue by source
+plt.figure(figsize=(10, 6))
+sns.barplot(data=revenue_source_df, x="Source", y="Revenue")
+plt.title("Revenue by Source")
+plt.xlabel("Source")
+plt.ylabel("Revenue")
+plt.show()
+
+# Create a bar plot of revenue by payment method
+plt.figure(figsize=(10, 6))
+sns.barplot(data=revenue_payment_df, x="Payment Method", y="Revenue")
+plt.title("Revenue by Payment Method")
+plt.xlabel("Payment Method")
+plt.ylabel("Revenue")
+plt.show()
